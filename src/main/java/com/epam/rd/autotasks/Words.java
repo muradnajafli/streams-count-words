@@ -1,12 +1,37 @@
 package com.epam.rd.autotasks;
 
-
-import java.util.List;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Words {
 
     public String countWords(List<String> lines) {
+        Map<String, Integer> wordCountMap = lines.stream()
+                .flatMap(line -> Pattern.compile("[ .,‘’(“—/:?!”;*)'\"-]|\\s+")
+                        .splitAsStream(line))
+                .map(String::toLowerCase)
+                .filter(word -> word.length() >= 4)
+                .collect(Collectors.toMap(word -> word, word -> 1, Integer::sum));
 
-        return null;
+
+        wordCountMap.entrySet().removeIf(stringIntegerEntry -> stringIntegerEntry.getValue() < 10);
+
+        List<Map.Entry<String, Integer>> sortedEntries = wordCountMap.entrySet().stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed().thenComparing(Map.Entry.comparingByKey()))
+                .collect(Collectors.toList());
+
+
+        String result = sortedEntries.stream()
+                .map(entry -> {
+                    String entryString = entry.getKey() + " - " + entry.getValue();
+                    wordCountMap.put(entry.getKey(), entry.getValue());
+                    return entryString;
+                })
+                .collect(Collectors.joining("\n"));
+
+
+        return result;
+
     }
 }
